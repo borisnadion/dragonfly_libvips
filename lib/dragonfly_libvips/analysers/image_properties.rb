@@ -8,9 +8,6 @@ module DragonflyLibvips
       DPI = 300
 
       def call(content)
-        return {} unless content.ext
-        return {} unless SUPPORTED_FORMATS.include?(content.ext.downcase)
-
         input_options = {}
         input_options["access"] = "sequential"
         input_options["autorotate"] = true if content.mime_type == "image/jpeg"
