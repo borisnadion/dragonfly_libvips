@@ -11,13 +11,24 @@ module DragonflyLibvips
       DPI = 300
 
       def call(content, geometry, options = {})
-        raise UnsupportedFormat unless content.ext
-        raise UnsupportedFormat unless SUPPORTED_FORMATS.include?(content.ext.downcase)
-
         options = DragonflyLibvips.stringify_keys(options)
-
         filename = content.path
-        format = options.fetch("format", content.ext).to_s
+
+        if content.mime_type == "application/octet-stream"
+          loader = ::Vips::Image.new_from_file(content.path).get('vips-loader')
+          format = if loader =~ /jpeg/
+            "jpg"
+          elsif loader =~ /png/
+            "png"
+          elsif loader =~ /tiff/
+            "tiff"
+          end
+        else
+          format = options.fetch("format", content.ext.downcase).to_s
+        end
+
+        raise UnsupportedFormat unless format
+        raise UnsupportedFormat unless SUPPORTED_FORMATS.include?(format.downcase)
 
         input_options = options.fetch("input_options", {})
         input_options["access"] = input_options.fetch("access", "sequential")
